@@ -4,11 +4,11 @@
 #include <stack>
 #include <vector>
 #include <windows.h>
-
 using namespace std;
 
-// Used for clearing console
+// Used for clearing console and changing color
 #define cls system("cls");
+HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
 // Initializes properties of maze and player
 const int ROWS = 19;
@@ -35,16 +35,24 @@ void gotoxy(int x, int y)
 // Function to print the maze
 void printMaze(const unsigned char maze[ROWS][COLS])
 {
+	// Set the console text color 9 is blue
+	SetConsoleTextAttribute(hConsole, 9);
 	for (int i = 0; i < ROWS; i++)
 	{
 		for (int j = 0; j < COLS; j++)
 		{
 			gotoxy(j, i);
+
 			std::cout << maze[i][j] << ' ';
 		}
 		std::cout << std::endl;
 	}
+
+	// Reset the console text color to default 15 is default
+	SetConsoleTextAttribute(hConsole, 15);
+
 	// Instruction
+	SetConsoleTextAttribute(hConsole, 12);
 	cout << "\nMaze Game with Stacks" << endl;
 	cout << "---------------------" << endl;
 
@@ -54,6 +62,7 @@ void printMaze(const unsigned char maze[ROWS][COLS])
 	cout << "#: Walls" << endl;
 	cout << "P: Player" << endl;
 	cout << "Blank spaces: Valid paths" << endl;
+	SetConsoleTextAttribute(hConsole, 15);
 }
 
 // Initializes Maze
@@ -85,10 +94,17 @@ void playermove(int prevposY, int prevposX, int posY, int posX)
 	// Using 2 gotoxy function to clear the prev moves & move the player
 	unsigned char space = {32};
 	maze[posX][posY] = player;
+
+	// Set the console text color 14 is yellow
+	SetConsoleTextAttribute(hConsole, 14);
+
 	gotoxy(prevposY, prevposX);
 	cout << space;
 	gotoxy(posY, posX);
 	cout << player;
+
+	// Reset the console text color to default 15 is default
+	SetConsoleTextAttribute(hConsole, 15);
 }
 
 void playerAction()
@@ -153,7 +169,9 @@ int main()
 		// Check if the player reaches the end
 		if (maze[posX][posY] == maze[endX][endY])
 		{
+			SetConsoleTextAttribute(hConsole, 10);
 			cout << "You win";
+			SetConsoleTextAttribute(hConsole, 15);
 			break;
 		}
 	}
@@ -164,12 +182,18 @@ int main()
 		// get the top of the position and the previous
 		pair<int, int> pos = playerMoves.top();
 		pair<int, int> prevPos = PrevplayerMoves.top();
+
+		// backtrack to the stack
 		playerMoves.pop();
 		PrevplayerMoves.pop();
+
+		// move the player using the top of the stack
 		playermove(prevPos.second, prevPos.first, pos.second, pos.first);
+
 		// Delay for animation
 		Sleep(100);
 	}
 	cls;
+
 	return 0;
 }
